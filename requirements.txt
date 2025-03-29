@@ -1,0 +1,7 @@
+Flask
+pandas
+numpy
+scikit-learn
+joblib
+optuna
+gunicorn  # Required for deploying on Render
