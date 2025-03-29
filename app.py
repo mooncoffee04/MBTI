@@ -13,7 +13,7 @@ y = df["Personality"]
 
 # Train model (Use best params)
 best_params = {
-    "n_estimators": 150,
+    "n_estimators": 50,
     "max_depth": 17,
     "min_samples_split": 6,
     "min_samples_leaf": 2,
