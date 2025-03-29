@@ -1,25 +1,15 @@
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelEncoder
-from sklearn.feature_selection import RFE
-from sklearn.model_selection import train_test_split
 
 # Load dataset
-df = pd.read_csv("16P.csv", encoding="ISO-8859-1")  # Change this to your actual dataset
+df = pd.read_csv("16P.csv", encoding="ISO-8859-1")  # Ensure correct encoding
 
-# Encode target variable (Personality)
-label_encoder = LabelEncoder()
-df["Personality_Encoded"] = label_encoder.fit_transform(df["Personality"])
+# Extract features & target
+X = df.drop(columns=["Response Id", "Personality"], errors="ignore")
+y = df["Personality"]
 
-# Separate features and target
-X = df.drop(columns=["Response Id", "Personality", "Personality_Encoded"], errors='ignore')
-y = df["Personality_Encoded"]
-
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Define the best parameters from your tuning
+# Train model (Use best params)
 best_params = {
     "n_estimators": 150,
     "max_depth": 17,
@@ -27,21 +17,15 @@ best_params = {
     "min_samples_leaf": 2,
     "random_state": 42
 }
-
-# Train Random Forest model
 rf = RandomForestClassifier(**best_params)
-rf.fit(X_train, y_train)
+rf.fit(X, y)
 
-# Feature Selection using RFE
-num_features_to_select = 10  
-rfe = RFE(estimator=rf, n_features_to_select=num_features_to_select)
-rfe.fit(X_train, y_train)
-selected_features = X.columns[rfe.support_]
+# Select Top 25 Features
+importances = rf.feature_importances_
+top_n = 25  # Number of features to keep
+selected_features = X.columns[np.argsort(importances)[::-1][:top_n]]
 
-# Personality Mapping
-personality_map = dict(zip(label_encoder.transform(label_encoder.classes_), label_encoder.classes_))
-
-# Initialize Flask app
+# Initialize Flask App
 app = Flask(__name__)
 
 @app.route("/")
@@ -51,22 +35,20 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # Get user inputs
+        # Get user inputs for only the selected 25 features
         user_input = {feature: float(request.form[feature]) for feature in selected_features}
 
         # Convert to DataFrame
         input_data = pd.DataFrame([user_input])
 
-        # Predict personality
+        # Make prediction
         predicted_label = rf.predict(input_data)[0]
-        predicted_personality = personality_map.get(predicted_label, "Unknown Personality")
 
-        return render_template("index.html", features=selected_features, result=predicted_personality)
+        return render_template("index.html", features=selected_features, result=predicted_label)
 
     except Exception as e:
         return jsonify({"error": str(e)})
 
 if __name__ == "__main__":
     app.run(debug=True)
-
 
