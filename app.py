@@ -1,3 +1,5 @@
+import os
+import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
 from sklearn.ensemble import RandomForestClassifier
@@ -35,8 +37,12 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # Get user inputs for only the selected 25 features
-        user_input = {feature: float(request.form[feature]) for feature in selected_features}
+        # Ensure all required inputs are received
+        user_input = {}
+        for feature in selected_features:
+            if feature not in request.form:
+                return jsonify({"error": f"Missing input for {feature}"}), 400
+            user_input[feature] = float(request.form[feature])
 
         # Convert to DataFrame
         input_data = pd.DataFrame([user_input])
@@ -47,8 +53,8 @@ def predict():
         return render_template("index.html", features=selected_features, result=predicted_label)
 
     except Exception as e:
-        return jsonify({"error": str(e)})
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    port = int(os.environ.get("PORT", 5000))  # Use Render's PORT variable
+    app.run(host="0.0.0.0", port=port, debug=True)
