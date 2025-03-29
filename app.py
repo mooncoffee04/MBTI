@@ -6,7 +6,7 @@ from sklearn.feature_selection import RFE
 from sklearn.model_selection import train_test_split
 
 # Load dataset
-df = pd.read_csv("your_dataset.csv")  # Change this to your actual dataset
+df = pd.read_csv("16P.csv")  # Change this to your actual dataset
 
 # Encode target variable (Personality)
 label_encoder = LabelEncoder()
