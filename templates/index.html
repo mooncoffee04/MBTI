@@ -5,30 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MBTI Personality Prediction</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; }
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: auto; 
+            padding: 20px; 
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
         h2 { text-align: center; }
-        form { display: flex; flex-direction: column; }
-        label { margin-top: 10px; font-weight: bold; }
-        input { padding: 5px; }
-        button { margin-top: 20px; padding: 10px; background-color: blue; color: white; border: none; cursor: pointer; }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        label { font-weight: bold; }
+        input { 
+            padding: 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+        }
+        button { 
+            padding: 10px; 
+            background-color: blue; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 5px;
+            font-size: 16px;
+        }
         button:hover { background-color: darkblue; }
-        .result { text-align: center; font-size: 1.5em; margin-top: 20px; }
+        .result { 
+            text-align: center; 
+            font-size: 1.5em; 
+            margin-top: 20px; 
+            font-weight: bold;
+            color: green;
+        }
     </style>
 </head>
 <body>
-    <h2>MBTI Personality Prediction</h2>
-    <form action="/predict" method="post">
-        {% for feature in features %}
-            <label for="{{ feature }}">{{ feature }}</label>
-            <input type="number" name="{{ feature }}" min="-3" max="3" step="1" required>
-        {% endfor %}
-        <button type="submit">Predict</button>
-    </form>
+    <div class="container">
+        <h2>MBTI Personality Prediction</h2>
+        <form action="/predict" method="post">
+            {% for feature in features %}
+                <label for="{{ feature }}">{{ feature.replace("_", " ").title() }}</label>
+                <input type="number" name="{{ feature }}" id="{{ feature }}" min="-3" max="3" step="1" required>
+            {% endfor %}
+            <button type="submit">Predict</button>
+        </form>
 
-    {% if result %}
-    <div class="result">
-        <h3>Predicted Personality Type: {{ result }}</h3>
+        {% if result %}
+        <div class="result">
+            <h3>Predicted Personality Type: {{ result }}</h3>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 </body>
 </html>
+
